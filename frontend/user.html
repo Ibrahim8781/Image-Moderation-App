@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Image Moderation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      color: #333;
+      text-align: center;
+    }
+    section {
+      margin-bottom: 30px;
+    }
+    input[type="file"],
+    input[type="text"],
+    button, textarea {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    textarea {
+      height: 120px;
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Image Moderation</h1>
+
+  <section>
+    <h2>1. Enter Your Token</h2>
+    <input id="userToken" placeholder="Bearer token" />
+    <button onclick="saveToken()">Save Token</button>
+  </section>
+
+  <section>
+    <h2>2. Upload & Moderate</h2>
+    <input type="file" id="imgFile" />
+    <button onclick="moderate()">Moderate</button>
+    <textarea id="modResult" readonly></textarea>
+  </section>
+
+  <script src="app_user.js"></script>
+</body>
+</html>

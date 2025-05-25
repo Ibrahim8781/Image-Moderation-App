@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Admin Console</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      color: #333;
+      text-align: center;
+    }
+    section {
+      margin-bottom: 30px;
+    }
+    input, button, textarea {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    textarea {
+      height: 120px;
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Admin Console</h1>
+
+  <section>
+    <h2>1. Log In</h2>
+    <input id="loginUser" placeholder="Username" />
+    <input id="loginPass" placeholder="Password" type="password" />
+    <button onclick="doLogin()">Log In</button>
+    <textarea id="loginResult" readonly></textarea>
+  </section>
+
+  <section>
+    <h2>2. Manage Tokens</h2>
+    <button onclick="createToken(false)">Create User Token</button>
+    <button onclick="createToken(true)">Create Admin Token</button>
+    <button onclick="listTokens()">List All Tokens</button>
+    <textarea id="tokenResult" readonly></textarea>
+  </section>
+
+  <script src="app_admin.js"></script>
+</body>
+</html>
