@@ -33,7 +33,10 @@ usages_collection = db["usages"]
 app = FastAPI()
 
 # -- Mount Static Files for Frontend UI --------------------------------------
-app.mount("/ui", StaticFiles(directory="frontend", html=True), name="static")
+BASE_DIR = "/app"  
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
+
+app.mount("/ui", StaticFiles(directory=FRONTEND_DIR, html=True), name="static")
 
 # -- Security and AWS Rekognition Client Setup -----------------------------
 security = HTTPBearer()
