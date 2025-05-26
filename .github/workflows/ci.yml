@@ -50,7 +50,7 @@ jobs:
         context: .
         push: true
         tags: |
-          student9876/image-moderation-api:latest
-          student9876/image-moderation-api:${{ github.sha }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/image-moderation-api:latest
+          ${{ secrets.DOCKERHUB_USERNAME }}/image-moderation-api:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
