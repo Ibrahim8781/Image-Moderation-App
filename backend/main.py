@@ -33,7 +33,10 @@ usages_collection = db["usages"]
 app = FastAPI()
 
 # -- Mount Static Files for Frontend UI --------------------------------------
-app.mount("/ui", StaticFiles(directory="frontend", html=True), name="static")
+BASE_DIR = "/app"  
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
+
+app.mount("/ui", StaticFiles(directory=FRONTEND_DIR, html=True), name="static")
 
 # -- Security and AWS Rekognition Client Setup -----------------------------
 security = HTTPBearer()
@@ -81,7 +84,12 @@ class LoginData(BaseModel):
     username: str
     password: str
 
+@app.get("/")
+def root():
+    return {"message": "Hello from FastAPI"}
+
 # -- Authetnication Endpoints ---------------------------------------------------
+
 @app.post("/auth/login")
 async def admin_login(data: LoginData):
     if data.username != ADMIN_USER or data.password != ADMIN_PASS:

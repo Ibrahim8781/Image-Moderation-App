@@ -1,5 +1,8 @@
+.env*
 venv/
+.vscode/
+.pytest_cache/
+.aws/
+.dockerignore
 __pycache__/
-*.pyc
-.env
-requirements.txt/
+.DS_Store
