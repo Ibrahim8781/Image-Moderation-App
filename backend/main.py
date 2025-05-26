@@ -84,7 +84,12 @@ class LoginData(BaseModel):
     username: str
     password: str
 
+@app.get("/")
+def root():
+    return {"message": "Hello from FastAPI"}
+
 # -- Authetnication Endpoints ---------------------------------------------------
+
 @app.post("/auth/login")
 async def admin_login(data: LoginData):
     if data.username != ADMIN_USER or data.password != ADMIN_PASS:
