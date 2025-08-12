@@ -11,6 +11,8 @@ import uuid
 from fastapi import UploadFile, File, HTTPException, Depends
 import boto3
 
+
+
 load_dotenv()
 
 # -- Config Variables -------------------------------------------------------
@@ -33,14 +35,17 @@ usages_collection = db["usages"]
 app = FastAPI()
 
 # -- Mount Static Files for Frontend UI --------------------------------------
-BASE_DIR = "/app"  
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
 app.mount("/ui", StaticFiles(directory=FRONTEND_DIR, html=True), name="static")
 
 # -- Security and AWS Rekognition Client Setup -----------------------------
 security = HTTPBearer()
-rekognition_client = boto3.client("rekognition", region_name="us-east-1")
+rekognition_client = boto3.client(
+    "rekognition",
+    region_name=os.getenv("AWS_DEFAULT_REGION", "us-east-1")
+)
 
 
 
