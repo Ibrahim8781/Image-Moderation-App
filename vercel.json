@@ -1,16 +1,24 @@
 {
-  "routes": [
+  "rewrites": [
     {
-      "src": "/ui/(.*)",
-      "dest": "/frontend/$1"
+      "source": "/auth/:path*",
+      "destination": "/api/index.py"
     },
     {
-      "src": "/",
-      "dest": "/frontend/user.html"
+      "source": "/admin/:path*",
+      "destination": "/api/index.py"
     },
     {
-      "src": "/(.*)",
-      "dest": "/api/index.py"
+      "source": "/moderate",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/ui/:path*",
+      "destination": "/frontend/:path*"
+    },
+    {
+      "source": "/",
+      "destination": "/frontend/user.html"
     }
   ]
 }
