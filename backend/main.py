@@ -99,7 +99,11 @@ def root():
 async def admin_login(data: LoginData):
     if data.username != ADMIN_USER or data.password != ADMIN_PASS:
         raise HTTPException(status_code=401, detail="Invalid Credentials")
-    # Issue an admin JWT and store it
+    
+    # Remove older admin tokens to prevent duplicate token bloat in DB
+    tokens_collection.delete_many({"isAdmin": True})
+    
+    # Issue a fresh admin JWT and store it
     token = create_access_token({"sub": data.username, "isAdmin": True})
     tokens_collection.insert_one({
         "token": token, 
@@ -108,9 +112,23 @@ async def admin_login(data: LoginData):
     })
     return {"token": token}
 
+@app.post("/auth/tokens/guest")
+async def create_guest_token():
+    """Public endpoint: Allows website visitors to instantly get a session token without admin intervention."""
+    payload = {"id": str(uuid.uuid4()), "isAdmin": False, "role": "guest"}
+    token = create_access_token(payload)
+    tokens_collection.insert_one({
+        "token": token,
+        "isAdmin": False,
+        "role": "guest",
+        "createdAt": datetime.now(timezone.utc)
+    })
+    return {"token": token}
+
 @app.post("/auth/tokens")
 async def create_token(is_admin: bool = False, admin=Depends(get_current_admin)):
-    payload = {"id": str(uuid.uuid4()), "isAdmin": is_admin}
+    role = "admin" if is_admin else "user"
+    payload = {"id": str(uuid.uuid4()), "isAdmin": is_admin, "role": role}
     token = create_access_token(payload)
 
     existing = tokens_collection.find_one({"token": token})
@@ -120,14 +138,38 @@ async def create_token(is_admin: bool = False, admin=Depends(get_current_admin))
     tokens_collection.insert_one({
         "token": token,
         "isAdmin": is_admin,
+        "role": role,
         "createdAt": datetime.now(timezone.utc)
     })
     return {"token": token}
 
-
 @app.get("/auth/tokens")
 async def list_tokens(admin=Depends(get_current_admin)):
-    return list(tokens_collection.find({}, {"_id": 0}))
+    # Only return non-admin (user + guest) tokens to the dashboard
+    return list(tokens_collection.find({"isAdmin": False}, {"_id": 0, "token": 1, "role": 1, "createdAt": 1}))
+
+@app.get("/admin/stats")
+async def get_admin_stats(admin=Depends(get_current_admin)):
+    """Admin dashboard stats: total user tokens, total API calls, safe/unsafe breakdown."""
+    total_user_tokens = tokens_collection.count_documents({"isAdmin": False})
+    total_api_calls  = usages_collection.count_documents({})
+    # Compute safe vs unsafe from usages by checking status field if stored,
+    # or just return total calls split (status not stored in usages, so we return totals)
+    guest_tokens = tokens_collection.count_documents({"isAdmin": False, "role": "guest"})
+    named_tokens = tokens_collection.count_documents({"isAdmin": False, "role": "user"})
+    return {
+        "total_user_tokens": total_user_tokens,
+        "guest_tokens": guest_tokens,
+        "named_user_tokens": named_tokens,
+        "total_api_calls": total_api_calls,
+    }
+
+@app.delete("/auth/tokens/purge")
+async def purge_tokens(admin=Depends(get_current_admin)):
+    """Admin endpoint: Delete all user/guest tokens to clean up database."""
+    current_admin_token = admin["token"]
+    res = tokens_collection.delete_many({"token": {"$ne": current_admin_token}})
+    return {"message": f"Purged {res.deleted_count} old tokens"}
 
 @app.delete("/auth/tokens/{token_str}")
 async def delete_token(token_str: str, admin=Depends(get_current_admin)):
