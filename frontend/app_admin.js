@@ -176,7 +176,7 @@ function copyNewToken() {
 // ── Token list ───────────────────────────────────────
 async function listTokens() {
   const tbody = document.getElementById("tokenTableBody");
-  tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:1.5rem;">
+  tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-tertiary);padding:1.5rem;">
     <div class="spinner" style="margin:0 auto;"></div></td></tr>`;
 
   try {
@@ -206,15 +206,15 @@ async function listTokens() {
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:#fff;">
+        <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-primary);">
           ${shortTok}
-          <button style="background:none;border:none;color:var(--primary);cursor:pointer;padding:0 0.3rem;" 
+          <button style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0 0.3rem;" 
             title="Copy full token" onclick="copyFull('${rec.token}')">
             <i class="fa-regular fa-copy"></i>
           </button>
         </td>
         <td><span class="role-badge ${badgeCls}">${badgeTxt}</span></td>
-        <td style="color:var(--text-muted);font-size:0.82rem;">${created}</td>
+        <td style="color:var(--text-secondary);font-family:var(--font-mono);font-size:0.75rem;">${created}</td>
         <td style="text-align:right;">
           <button class="btn btn-danger" onclick="deleteToken('${rec.token}')">
             <i class="fa-solid fa-trash"></i> Revoke
@@ -281,7 +281,7 @@ function handleAuthError(res) {
 // ── Toast ────────────────────────────────────────────
 function showToast(message, type = "info") {
   const icons = {
-    info:    `<i class="fa-solid fa-circle-info"  style="color:var(--primary);"></i>`,
+    info:    `<i class="fa-solid fa-circle-info"  style="color:var(--accent);"></i>`,
     success: `<i class="fa-solid fa-circle-check" style="color:var(--success);"></i>`,
     error:   `<i class="fa-solid fa-circle-xmark" style="color:var(--danger);"></i>`,
     warning: `<i class="fa-solid fa-triangle-exclamation" style="color:var(--warning);"></i>`,

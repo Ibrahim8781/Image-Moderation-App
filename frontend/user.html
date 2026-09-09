@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Moderation Portal | ShieldAI</title>
-  <meta name="description" content="Test AWS Rekognition image moderation instantly. No signup required.">
+  <title>Image Moderation — ShieldAI</title>
+  <meta name="description" content="Test AWS Rekognition image moderation instantly. Upload any image and get instant content analysis results.">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -17,31 +17,39 @@
       <span>ShieldAI</span>
     </a>
     <div class="nav-links">
-      <a href="user.html" class="nav-link active"><i class="fa-solid fa-wand-magic-sparkles"></i> Try It</a>
-      <a href="admin.html" class="nav-link"><i class="fa-solid fa-user-gear"></i> Admin</a>
+      <a href="user.html" class="nav-link active">Try It</a>
+      <a href="admin.html" class="nav-link">Admin</a>
       <div class="api-status" id="sessionBadge">
         <span class="status-dot"></span>
-        <span id="sessionStatus">Connecting...</span>
+        <span id="sessionStatus">Connecting…</span>
       </div>
     </div>
   </nav>
 
-  <main class="main-container" style="max-width:900px;">
+  <main class="main-container" style="max-width:860px;">
 
     <div class="page-header">
-      <h1 class="page-title">AI Image Moderation</h1>
-      <p class="page-subtitle">Powered by <strong style="color:var(--primary);">AWS Rekognition</strong> — upload any image, get instant content analysis</p>
+      <h1 class="page-title">Image Moderation</h1>
+      <p class="page-subtitle">
+        Powered by AWS Rekognition — upload an image and receive instant content analysis.
+      </p>
     </div>
 
-    <!-- ── UPLOAD CARD ─────────────────────────────── -->
+    <!-- ── Upload Card ──────────────────────────────────── -->
     <div class="glass-card">
-      <div class="dropzone" id="dropzone" onclick="document.getElementById('imgFile').click()">
-        <div class="dropzone-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-        <div class="dropzone-title">Drop your image here, or click to browse</div>
-        <div class="dropzone-desc">PNG, JPG, JPEG, WEBP supported</div>
-        <input type="file" id="imgFile" accept="image/*" onchange="handleFileSelect(event)" />
+
+      <div class="dropzone" id="dropzone"
+           onclick="document.getElementById('imgFile').click()">
+        <div class="dropzone-icon">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i>
+        </div>
+        <div class="dropzone-title">Drop image here, or click to select</div>
+        <div class="dropzone-desc">PNG · JPG · WEBP — max 5 MB</div>
+        <input type="file" id="imgFile" accept="image/*"
+               onchange="handleFileSelect(event)" />
       </div>
 
+      <!-- Preview -->
       <div class="preview-container" id="previewContainer">
         <img id="previewImage" class="preview-thumb" src="" alt="Preview" />
         <div class="preview-info">
@@ -53,8 +61,9 @@
         </button>
       </div>
 
-      <button class="btn btn-primary" id="btnModerate" onclick="moderate()" style="margin-top:1.25rem;">
-        <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze with AWS Rekognition
+      <button class="btn btn-primary" id="btnModerate" onclick="moderate()"
+              style="margin-top: 1rem;">
+        Analyze with AWS Rekognition
       </button>
 
       <!-- Result -->
@@ -62,30 +71,36 @@
         <div class="result-header">
           <div class="result-badge-icon" id="resultIcon"></div>
           <div>
-            <div class="result-title"  id="resultTitle"></div>
+            <div class="result-title"    id="resultTitle"></div>
             <div class="result-subtitle" id="resultFilename"></div>
           </div>
         </div>
         <div id="flaggedContainer" style="display:none;">
-          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;">Detected Labels</div>
+          <span class="section-label">Detected Labels</span>
           <div class="flagged-list" id="flaggedList"></div>
         </div>
-        <div style="margin-top:1.25rem;">
-          <button class="btn btn-secondary" style="font-size:0.8rem;padding:0.4rem 0.85rem;width:auto;" onclick="toggleRawJson()">
-            <i class="fa-solid fa-code"></i> Raw JSON Response
+        <div style="margin-top: 1rem;">
+          <button class="btn btn-secondary"
+            style="font-size:0.78rem; padding:0.45rem 0.875rem; width:auto;"
+            onclick="toggleRawJson()">
+            <i class="fa-solid fa-code"></i> Raw JSON
           </button>
           <pre id="rawJsonBlock" class="code-block" style="display:none;"></pre>
         </div>
       </div>
     </div>
 
-    <!-- ── HOW IT WORKS / JWT SHOWCASE ────────────── -->
+    <!-- ── How It Works ─────────────────────────────────── -->
     <details class="glass-card accordion-card">
       <summary class="accordion-summary">
-        <span style="display:flex;align-items:center;gap:0.75rem;">
-          <i class="fa-solid fa-circle-info" style="color:var(--primary);"></i>
-          <span style="font-size:1rem;font-weight:700;color:#fff;">How does this work?</span>
-          <small style="color:var(--text-dim);font-size:0.8rem;">— JWT Authentication explained</small>
+        <span style="display:flex; align-items:center; gap:0.625rem;">
+          <span style="font-size:0.875rem; font-weight:600; color:var(--text-primary);">
+            How it works
+          </span>
+          <span style="font-family:var(--font-mono); font-size:0.68rem;
+                       color:var(--text-tertiary); letter-spacing:0.04em;">
+            JWT auth · AWS Rekognition
+          </span>
         </span>
         <i class="fa-solid fa-chevron-down accordion-chevron"></i>
       </summary>
@@ -93,35 +108,37 @@
       <div class="accordion-body">
 
         <!-- Flow Diagram -->
-        <div class="flow-steps">
+        <div class="flow-steps" style="margin-top: 1.25rem;">
           <div class="flow-step">
-            <div class="flow-step-icon"><i class="fa-solid fa-globe"></i></div>
-            <div class="flow-step-label">You open the page</div>
+            <div class="flow-step-icon">
+              <i class="fa-solid fa-globe"></i>
+            </div>
+            <div class="flow-step-label">Page load</div>
           </div>
           <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           <div class="flow-step">
-            <div class="flow-step-icon" style="background:rgba(16,185,129,0.15);color:var(--success);border-color:rgba(16,185,129,0.3);">
+            <div class="flow-step-icon">
               <i class="fa-solid fa-key"></i>
             </div>
-            <div class="flow-step-label">Server issues a JWT</div>
+            <div class="flow-step-label">JWT issued</div>
           </div>
           <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           <div class="flow-step">
-            <div class="flow-step-icon" style="background:rgba(245,158,11,0.15);color:var(--warning);border-color:rgba(245,158,11,0.3);">
+            <div class="flow-step-icon">
               <i class="fa-solid fa-image"></i>
             </div>
-            <div class="flow-step-label">You upload an image</div>
+            <div class="flow-step-label">Upload image</div>
           </div>
           <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           <div class="flow-step">
-            <div class="flow-step-icon" style="background:rgba(168,85,247,0.15);color:#a855f7;border-color:rgba(168,85,247,0.3);">
+            <div class="flow-step-icon">
               <i class="fa-brands fa-aws"></i>
             </div>
-            <div class="flow-step-label">AWS scans it</div>
+            <div class="flow-step-label">Rekognition scan</div>
           </div>
           <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           <div class="flow-step">
-            <div class="flow-step-icon" style="background:rgba(99,102,241,0.15);color:var(--primary);border-color:rgba(99,102,241,0.3);">
+            <div class="flow-step-icon">
               <i class="fa-solid fa-shield-check"></i>
             </div>
             <div class="flow-step-label">Result returned</div>
@@ -129,34 +146,33 @@
         </div>
 
         <!-- JWT Visualiser -->
-        <div style="margin-top:1.75rem;">
-          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;">
-            Your Active Session Token (JWT)
-          </div>
+        <div style="margin-top: 1.75rem;">
+          <span class="section-label">Active Session Token</span>
           <div class="jwt-visual">
-            <span class="jwt-part jwt-header"    id="jwtHeader">loading...</span><span class="jwt-dot">.</span><span
-                 class="jwt-part jwt-payload"   id="jwtPayload">loading...</span><span class="jwt-dot">.</span><span
-                 class="jwt-part jwt-signature" id="jwtSignature">loading...</span>
+            <span class="jwt-part jwt-header"    id="jwtHeader">loading…</span><span class="jwt-dot">.</span><span
+                 class="jwt-part jwt-payload"   id="jwtPayload">loading…</span><span class="jwt-dot">.</span><span
+                 class="jwt-part jwt-signature" id="jwtSignature">loading…</span>
           </div>
           <div class="jwt-legend">
-            <span class="jwt-legend-item"><span class="dot" style="background:#f59e0b;"></span>Header — algorithm &amp; token type</span>
-            <span class="jwt-legend-item"><span class="dot" style="background:#10b981;"></span>Payload — your claims &amp; expiry</span>
-            <span class="jwt-legend-item"><span class="dot" style="background:#6366f1;"></span>Signature — tamper-proof HMAC</span>
+            <span class="jwt-legend-item"><span class="dot" style="background:#d97706;"></span>Header — alg &amp; type</span>
+            <span class="jwt-legend-item"><span class="dot" style="background:#16a34a;"></span>Payload — claims &amp; expiry</span>
+            <span class="jwt-legend-item"><span class="dot" style="background:#6366f1;"></span>Signature — HMAC tamper-proof</span>
           </div>
 
           <!-- Decoded Payload -->
-          <div style="margin-top:1.25rem;">
-            <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">
-              Decoded Payload (server reads this on every request)
-            </div>
+          <div style="margin-top: 1rem;">
+            <span class="section-label">Decoded Payload</span>
             <div class="jwt-decoded-grid" id="jwtDecodedGrid">
               <span class="jwt-key">status:</span>
-              <span class="jwt-val-str">"waiting for session token..."</span>
+              <span class="jwt-val-str">"waiting for session…"</span>
             </div>
           </div>
 
-          <p style="font-size:0.8rem;color:var(--text-dim);margin-top:1rem;line-height:1.6;">
-            The <strong style="color:#fff;">Signature</strong> is computed using a secret key only the server knows — so even if you decode the payload, you cannot alter it without the server rejecting it. This is how JWTs guarantee integrity without a database lookup on every request.
+          <p style="font-size:0.75rem; color:var(--text-tertiary); margin-top:0.875rem;
+                    line-height:1.65; font-family:var(--font-mono);">
+            The signature is computed with a secret only the server holds.
+            Decoding the payload is possible; altering it is not — the server
+            will reject any tampered token on the next request.
           </p>
         </div>
 

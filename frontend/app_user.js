@@ -213,7 +213,7 @@ function toggleRawJson() {
 // ── Toast ────────────────────────────────────────────
 function showToast(message, type = "info") {
   const icons = {
-    info:    `<i class="fa-solid fa-circle-info"  style="color:var(--primary);"></i>`,
+    info:    `<i class="fa-solid fa-circle-info"  style="color:var(--accent);"></i>`,
     success: `<i class="fa-solid fa-circle-check" style="color:var(--success);"></i>`,
     error:   `<i class="fa-solid fa-circle-xmark" style="color:var(--danger);"></i>`,
     warning: `<i class="fa-solid fa-triangle-exclamation" style="color:var(--warning);"></i>`,

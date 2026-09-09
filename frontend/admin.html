@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Console | ShieldAI</title>
+  <title>Admin Console — ShieldAI</title>
+  <meta name="description" content="ShieldAI admin console — manage API tokens and monitor sessions.">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -12,201 +13,224 @@
   <!-- Navbar -->
   <nav class="navbar">
     <a href="user.html" class="brand">
-      <div class="brand-icon">
-        <i class="fa-solid fa-shield-halved"></i>
-      </div>
+      <div class="brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
       <span>ShieldAI</span>
     </a>
     <div class="nav-links">
-      <a href="user.html" class="nav-link">
-        <i class="fa-solid fa-wand-magic-sparkles"></i> Try It
-      </a>
-      <a href="admin.html" class="nav-link active">
-        <i class="fa-solid fa-user-gear"></i> Admin
-      </a>
+      <a href="user.html" class="nav-link">Try It</a>
+      <a href="admin.html" class="nav-link active">Admin</a>
       <div class="api-status">
         <span class="status-dot"></span> API Online
       </div>
     </div>
   </nav>
 
-  <!-- ══ LOGIN SCREEN (shown when logged out) ══════════════════════ -->
+  <!-- ══ LOGIN SCREEN ══════════════════════════════════════ -->
   <div id="loginScreen">
-    <main class="main-container" style="max-width:480px; display:flex; flex-direction:column; justify-content:center; min-height:calc(100vh - 70px);">
+    <div class="login-layout">
 
-      <div class="page-header">
-        <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--primary),#a855f7);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:1.75rem;margin:0 auto 1rem;box-shadow:0 0 30px var(--primary-glow);">
-          <i class="fa-solid fa-user-shield"></i>
-        </div>
-        <h1 class="page-title" style="font-size:1.75rem;">Admin Login</h1>
-        <p class="page-subtitle">Authenticate with your admin credentials to access the dashboard</p>
+      <!-- Left panel: form -->
+      <div class="login-panel">
+        <p class="login-sub">Admin Console</p>
+        <h1 class="login-title">Sign in</h1>
+
+        <form onsubmit="event.preventDefault(); doLogin();" style="margin-top: 2rem;">
+
+          <div class="form-group">
+            <label class="form-label" for="loginUser">Username</label>
+            <input type="text" id="loginUser" class="custom-input"
+              placeholder="admin" autocomplete="username" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="loginPass">Password</label>
+            <input type="password" id="loginPass" class="custom-input"
+              placeholder="••••••••" autocomplete="current-password" />
+          </div>
+
+          <button class="btn btn-primary" id="btnLogin" type="submit"
+            style="margin-top: 0.5rem;">
+            Continue
+          </button>
+
+        </form>
       </div>
 
-      <div class="glass-card">
-        <!-- JWT Auth explanation badge -->
-        <div style="display:flex;align-items:center;gap:0.5rem;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:var(--radius-sm);padding:0.6rem 0.9rem;margin-bottom:1.5rem;">
-          <i class="fa-solid fa-key" style="color:var(--primary);font-size:0.9rem;"></i>
-          <span style="font-size:0.8rem;color:var(--text-muted);">Protected by <strong style="color:#fff;">JWT authentication</strong> — credentials are never stored in the browser</span>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Username</label>
-          <div class="input-wrapper">
-            <i class="fa-solid fa-user input-icon"></i>
-            <input type="text" id="loginUser" class="custom-input" placeholder="admin" autocomplete="username" />
+      <!-- Right panel: session spec (replaces JWT badge) -->
+      <div class="login-info">
+        <div>
+          <span class="login-info-label">Auth protocol</span>
+          <div class="session-spec" style="margin-top: 0.5rem;">
+            <div class="spec-row">
+              <span class="spec-key">Method</span>
+              <span class="spec-val accent">JWT / HS256</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Storage</span>
+              <span class="spec-val">Session only</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Persistence</span>
+              <span class="spec-val">None — cleared on tab close</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Transport</span>
+              <span class="spec-val">Bearer header</span>
+            </div>
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <div class="input-wrapper">
-            <i class="fa-solid fa-lock input-icon"></i>
-            <input type="password" id="loginPass" class="custom-input" placeholder="••••••••"
-              autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()" />
+        <div class="divider"></div>
+
+        <div>
+          <span class="login-info-label">Access scope</span>
+          <div class="session-spec" style="margin-top: 0.5rem;">
+            <div class="spec-row">
+              <span class="spec-key">Role</span>
+              <span class="spec-val accent">admin</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Capabilities</span>
+              <span class="spec-val">Token issuance, revocation, audit</span>
+            </div>
           </div>
         </div>
-
-        <button class="btn btn-primary" id="btnLogin" onclick="doLogin()">
-          <i class="fa-solid fa-right-to-bracket"></i> Sign In
-        </button>
-
-        <p style="text-align:center;font-size:0.8rem;color:var(--text-dim);margin-top:1.25rem;">
-          Signing in will issue a signed JWT stored only in this session.
-        </p>
       </div>
-    </main>
+
+    </div>
   </div>
 
-  <!-- ══ DASHBOARD (shown when logged in) ════════════════════════ -->
+  <!-- ══ DASHBOARD ══════════════════════════════════════════ -->
   <div id="dashboardScreen" style="display:none;">
-    <main class="main-container" style="max-width:950px;">
+    <main class="main-container" style="max-width:960px;">
 
-      <!-- Dashboard header row -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+      <!-- Dashboard header -->
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;
+                  margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <div>
-          <h1 class="page-title" style="font-size:1.75rem;text-align:left;margin:0;">Admin Dashboard</h1>
-          <p class="page-subtitle" style="text-align:left;">Welcome back, <strong style="color:#fff;" id="adminUsernameLabel">admin</strong></p>
+          <h1 class="page-title">Admin Dashboard</h1>
+          <p class="page-subtitle" style="font-family: var(--font-mono); font-size: 0.72rem;">
+            Signed in as <span id="adminUsernameLabel" style="color: var(--accent);">admin</span>
+          </p>
         </div>
-        <button class="btn btn-secondary" style="width:auto;padding:0.5rem 1.1rem;font-size:0.85rem;" onclick="doLogout()">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+        <button class="btn btn-secondary" style="width:auto;" onclick="doLogout()">
+          Sign out
         </button>
       </div>
 
-      <!-- ── STATS CARDS ───────────────────────────── -->
-      <div class="stats-grid">
+      <!-- ── Stats ──────────────────────────────────────── -->
+      <div class="stats-grid" style="margin-bottom: 1.5rem;">
         <div class="stat-card">
-          <div class="stat-icon" style="background:rgba(99,102,241,0.15);color:var(--primary);">
-            <i class="fa-solid fa-users"></i>
-          </div>
           <div class="stat-value" id="statTotalTokens">—</div>
-          <div class="stat-label">Active User Sessions</div>
+          <div class="stat-label">Active Sessions</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:var(--success);">
-            <i class="fa-solid fa-image"></i>
-          </div>
           <div class="stat-value" id="statApiCalls">—</div>
-          <div class="stat-label">Total Images Moderated</div>
+          <div class="stat-label">Images Moderated</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:var(--warning);">
-            <i class="fa-solid fa-user-clock"></i>
-          </div>
           <div class="stat-value" id="statGuestTokens">—</div>
           <div class="stat-label">Guest Sessions</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:rgba(168,85,247,0.15);color:#a855f7;">
-            <i class="fa-solid fa-id-badge"></i>
-          </div>
           <div class="stat-value" id="statNamedTokens">—</div>
-          <div class="stat-label">Named User Tokens</div>
+          <div class="stat-label">Named Tokens</div>
         </div>
       </div>
 
-      <!-- ── ADMIN JWT CARD ────────────────────────── -->
-      <div class="glass-card" style="margin-bottom:1.5rem;">
+      <!-- ── Admin Session Token ───────────────────────── -->
+      <div class="glass-card" style="margin-bottom: 1rem;">
         <div class="card-title">
-          <i class="fa-solid fa-fingerprint" style="color:#a855f7;"></i>
-          <span>Your Admin Session Token</span>
-          <span class="role-badge role-admin" style="margin-left:auto;">ADMIN JWT</span>
+          <i class="fa-solid fa-fingerprint"></i>
+          <span>Session Token</span>
+          <span class="role-badge role-admin" style="margin-left:auto;">ADMIN</span>
         </div>
 
-        <div class="jwt-visual" id="adminJwtVisual" style="margin-bottom:1rem;">
-          <span class="jwt-part jwt-header" id="adminJwtHeader">...</span>
-          <span class="jwt-dot">.</span>
-          <span class="jwt-part jwt-payload" id="adminJwtPayload">...</span>
-          <span class="jwt-dot">.</span>
-          <span class="jwt-part jwt-signature" id="adminJwtSignature">...</span>
+        <div class="jwt-visual" id="adminJwtVisual" style="margin-bottom: 0.75rem;">
+          <span class="jwt-part jwt-header"    id="adminJwtHeader">...</span><span class="jwt-dot">.</span><span
+               class="jwt-part jwt-payload"   id="adminJwtPayload">...</span><span class="jwt-dot">.</span><span
+               class="jwt-part jwt-signature" id="adminJwtSignature">...</span>
         </div>
 
-        <div class="jwt-legend" style="margin-bottom:1rem;">
-          <span class="jwt-legend-item"><span class="dot" style="background:#f59e0b;"></span>Header</span>
-          <span class="jwt-legend-item"><span class="dot" style="background:#10b981;"></span>Payload</span>
+        <div class="jwt-legend" style="margin-bottom: 0.875rem;">
+          <span class="jwt-legend-item"><span class="dot" style="background:#d97706;"></span>Header</span>
+          <span class="jwt-legend-item"><span class="dot" style="background:#16a34a;"></span>Payload</span>
           <span class="jwt-legend-item"><span class="dot" style="background:#6366f1;"></span>Signature</span>
         </div>
 
-        <!-- Decoded admin payload -->
         <div class="jwt-decoded-grid" id="adminJwtDecodedGrid"></div>
 
-        <button class="btn btn-secondary" style="width:auto;padding:0.5rem 1rem;font-size:0.8rem;margin-top:1rem;" onclick="copyAdminJwt()">
-          <i class="fa-solid fa-copy"></i> Copy Full Token
+        <button class="btn btn-secondary"
+          style="width:auto; padding:0.5rem 0.875rem; font-size:0.78rem; margin-top: 1rem;"
+          onclick="copyAdminJwt()">
+          <i class="fa-regular fa-copy"></i> Copy token
         </button>
       </div>
 
-      <!-- ── TOKEN MANAGEMENT ──────────────────────── -->
+      <!-- ── Token Management ──────────────────────────── -->
       <div class="glass-card">
         <div class="card-title">
-          <i class="fa-solid fa-key" style="color:var(--primary);"></i>
+          <i class="fa-solid fa-key"></i>
           <span>User Token Management</span>
         </div>
 
         <!-- Action row -->
-        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem;">
-          <button class="btn btn-primary" style="flex:1;min-width:160px;" onclick="createToken(false)">
-            <i class="fa-solid fa-plus"></i> Generate User Token
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom: 1.25rem;">
+          <button class="btn btn-primary" style="flex:1; min-width:150px;" onclick="createToken(false)">
+            <i class="fa-solid fa-plus"></i> Generate Token
           </button>
-          <button class="btn btn-secondary" style="flex:1;min-width:140px;" onclick="listTokens()">
-            <i class="fa-solid fa-rotate"></i> Refresh List
+          <button class="btn btn-secondary" style="flex:1; min-width:120px;" onclick="listTokens()">
+            <i class="fa-solid fa-rotate"></i> Refresh
           </button>
-          <button class="btn btn-danger" style="flex:0;padding:0.85rem 1.1rem;min-width:120px;" onclick="purgeTokens()">
-            <i class="fa-solid fa-broom"></i> Clear All
+          <button class="btn btn-danger" style="flex:0; white-space:nowrap;" onclick="purgeTokens()">
+            <i class="fa-solid fa-trash-can"></i> Clear All
           </button>
         </div>
 
-        <!-- New token output box -->
-        <div id="newTokenBox" style="display:none;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);border-radius:var(--radius-md);padding:1rem;margin-bottom:1.5rem;">
-          <div style="font-size:0.8rem;font-weight:700;color:var(--primary);margin-bottom:0.6rem;display:flex;justify-content:space-between;align-items:center;">
-            <span><i class="fa-solid fa-circle-check" style="margin-right:0.4rem;"></i> NEW TOKEN CREATED — share this with the user</span>
+        <!-- New token output -->
+        <div id="newTokenBox" style="display:none; margin-bottom:1.25rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center;
+                      margin-bottom: 0.5rem;">
+            <span style="font-family:var(--font-mono); font-size:0.68rem; text-transform:uppercase;
+                         letter-spacing:0.08em; color: var(--accent);">Token Issued</span>
             <span class="role-badge role-user">USER</span>
           </div>
-          <div style="display:flex;gap:0.5rem;align-items:center;">
+          <div style="display:flex; gap:0.5rem; align-items:center;">
             <input type="text" id="newTokenValue" class="custom-input" readonly
-              style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;" />
-            <button class="btn btn-primary" style="width:auto;padding:0.85rem 1.1rem;white-space:nowrap;" onclick="copyNewToken()">
-              <i class="fa-solid fa-copy"></i> Copy
+              style="font-family:var(--font-mono); font-size:0.78rem;" />
+            <button class="btn btn-secondary"
+              style="width:auto; padding:0.6rem 0.875rem; white-space:nowrap; flex-shrink:0;"
+              onclick="copyNewToken()">
+              <i class="fa-regular fa-copy"></i>
             </button>
           </div>
         </div>
 
-        <!-- Token table header -->
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
-          <span style="font-weight:700;color:#fff;font-size:0.95rem;">Active User &amp; Guest Sessions</span>
-          <span style="font-size:0.8rem;color:var(--text-dim);" id="tokenCountLabel">Loading...</span>
+        <!-- Table header -->
+        <div style="display:flex; justify-content:space-between; align-items:baseline;
+                    margin-bottom: 0.5rem;">
+          <span class="section-label">Active Sessions</span>
+          <span style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-tertiary);"
+                id="tokenCountLabel">Loading…</span>
         </div>
 
         <div class="table-container">
           <table class="custom-table">
             <thead>
               <tr>
-                <th>Token (preview)</th>
+                <th>Token</th>
                 <th>Type</th>
                 <th>Created</th>
                 <th style="text-align:right;">Action</th>
               </tr>
             </thead>
             <tbody id="tokenTableBody">
-              <tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:2rem;">Loading…</td></tr>
+              <tr>
+                <td colspan="4" style="text-align:center; color:var(--text-tertiary);
+                    padding:2rem; font-family:var(--font-mono); font-size:0.78rem;">
+                  Loading…
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
