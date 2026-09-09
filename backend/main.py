@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Request
+from fastapi.responses import RedirectResponse
+
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from pymongo import MongoClient
@@ -8,10 +10,7 @@ from dotenv import load_dotenv
 import os
 from fastapi.staticfiles import StaticFiles
 import uuid
-from fastapi import UploadFile, File, HTTPException, Depends
 import boto3
-
-
 
 load_dotenv()
 
@@ -34,6 +33,17 @@ except Exception as e:
 
 # -- making instance of an app of FastAPI Init -------------------------------
 app = FastAPI()
+
+# Middleware to strip Vercel serverless prefix `/api/index.py` from incoming request paths
+@app.middleware("http")
+async def fix_vercel_path_middleware(request: Request, call_next):
+    path = request.scope.get("path", "")
+    if path.startswith("/api/index.py"):
+        new_path = path.replace("/api/index.py", "")
+        if not new_path:
+            new_path = "/"
+        request.scope["path"] = new_path
+    return await call_next(request)
 
 # -- Mount Static Files for Frontend UI --------------------------------------
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -86,7 +96,7 @@ class LoginData(BaseModel):
 
 @app.get("/")
 def root():
-    return {"message": "Hello from FastAPI"}
+    return RedirectResponse(url="/ui/user.html")
 
 # -- Authetnication Endpoints ---------------------------------------------------
 
