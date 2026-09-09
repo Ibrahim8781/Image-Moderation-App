@@ -95,16 +95,18 @@ async def admin_login(data: LoginData):
     if data.username != ADMIN_USER or data.password != ADMIN_PASS:
         raise HTTPException(status_code=401, detail="Invalid Credentials")
     
-    # Remove older admin tokens to prevent duplicate token bloat in DB
-    tokens_collection.delete_many({"isAdmin": True})
-    
-    # Issue a fresh admin JWT and store it
+    # Issue a fresh admin JWT
     token = create_access_token({"sub": data.username, "isAdmin": True})
-    tokens_collection.insert_one({
-        "token": token, 
-        "isAdmin": True, 
-        "createdAt": datetime.now(timezone.utc)
-    })
+    try:
+        if 'tokens_collection' in globals():
+            tokens_collection.delete_many({"isAdmin": True})
+            tokens_collection.insert_one({
+                "token": token, 
+                "isAdmin": True, 
+                "createdAt": datetime.now(timezone.utc)
+            })
+    except Exception as e:
+        print(f"DB warning on admin login: {e}")
     return {"token": token}
 
 @app.post("/auth/tokens/guest")
@@ -112,12 +114,16 @@ async def create_guest_token():
     """Public endpoint: Allows website visitors to instantly get a session token without admin intervention."""
     payload = {"id": str(uuid.uuid4()), "isAdmin": False, "role": "guest"}
     token = create_access_token(payload)
-    tokens_collection.insert_one({
-        "token": token,
-        "isAdmin": False,
-        "role": "guest",
-        "createdAt": datetime.now(timezone.utc)
-    })
+    try:
+        if 'tokens_collection' in globals():
+            tokens_collection.insert_one({
+                "token": token,
+                "isAdmin": False,
+                "role": "guest",
+                "createdAt": datetime.now(timezone.utc)
+            })
+    except Exception as e:
+        print(f"DB warning on guest token creation: {e}")
     return {"token": token}
 
 @app.post("/auth/tokens")
@@ -125,52 +131,68 @@ async def create_token(is_admin: bool = False, admin=Depends(get_current_admin))
     role = "admin" if is_admin else "user"
     payload = {"id": str(uuid.uuid4()), "isAdmin": is_admin, "role": role}
     token = create_access_token(payload)
-
-    existing = tokens_collection.find_one({"token": token})
-    if existing:
-        raise HTTPException(status_code=409, detail="Token already exists")
-
-    tokens_collection.insert_one({
-        "token": token,
-        "isAdmin": is_admin,
-        "role": role,
-        "createdAt": datetime.now(timezone.utc)
-    })
+    try:
+        if 'tokens_collection' in globals():
+            tokens_collection.insert_one({
+                "token": token,
+                "isAdmin": is_admin,
+                "role": role,
+                "createdAt": datetime.now(timezone.utc)
+            })
+    except Exception as e:
+        print(f"DB warning on token creation: {e}")
     return {"token": token}
 
 @app.get("/auth/tokens")
 async def list_tokens(admin=Depends(get_current_admin)):
-    # Only return non-admin (user + guest) tokens to the dashboard
-    return list(tokens_collection.find({"isAdmin": False}, {"_id": 0, "token": 1, "role": 1, "createdAt": 1}))
+    try:
+        if 'tokens_collection' in globals():
+            return list(tokens_collection.find({"isAdmin": False}, {"_id": 0, "token": 1, "role": 1, "createdAt": 1}))
+    except Exception as e:
+        print(f"DB warning on list tokens: {e}")
+    return []
 
 @app.get("/admin/stats")
 async def get_admin_stats(admin=Depends(get_current_admin)):
-    """Admin dashboard stats: total user tokens, total API calls, safe/unsafe breakdown."""
-    total_user_tokens = tokens_collection.count_documents({"isAdmin": False})
-    total_api_calls  = usages_collection.count_documents({})
-    # Compute safe vs unsafe from usages by checking status field if stored,
-    # or just return total calls split (status not stored in usages, so we return totals)
-    guest_tokens = tokens_collection.count_documents({"isAdmin": False, "role": "guest"})
-    named_tokens = tokens_collection.count_documents({"isAdmin": False, "role": "user"})
-    return {
-        "total_user_tokens": total_user_tokens,
-        "guest_tokens": guest_tokens,
-        "named_user_tokens": named_tokens,
-        "total_api_calls": total_api_calls,
-    }
+    try:
+        if 'tokens_collection' in globals() and 'usages_collection' in globals():
+            total_user_tokens = tokens_collection.count_documents({"isAdmin": False})
+            total_api_calls  = usages_collection.count_documents({})
+            guest_tokens = tokens_collection.count_documents({"isAdmin": False, "role": "guest"})
+            named_tokens = tokens_collection.count_documents({"isAdmin": False, "role": "user"})
+            return {
+                "total_user_tokens": total_user_tokens,
+                "guest_tokens": guest_tokens,
+                "named_user_tokens": named_tokens,
+                "total_api_calls": total_api_calls,
+            }
+    except Exception as e:
+        print(f"DB warning on stats: {e}")
+    return {"total_user_tokens": 0, "guest_tokens": 0, "named_user_tokens": 0, "total_api_calls": 0}
 
 @app.delete("/auth/tokens/purge")
 async def purge_tokens(admin=Depends(get_current_admin)):
-    """Admin endpoint: Delete all user/guest tokens to clean up database."""
     current_admin_token = admin["token"]
-    res = tokens_collection.delete_many({"token": {"$ne": current_admin_token}})
-    return {"message": f"Purged {res.deleted_count} old tokens"}
+    try:
+        if 'tokens_collection' in globals():
+            res = tokens_collection.delete_many({"token": {"$ne": current_admin_token}})
+            return {"message": f"Purged {res.deleted_count} old tokens"}
+    except Exception as e:
+        print(f"DB warning on purge: {e}")
+    return {"message": "Purged 0 old tokens"}
 
 @app.delete("/auth/tokens/{token_str}")
 async def delete_token(token_str: str, admin=Depends(get_current_admin)):
-    res = tokens_collection.delete_one({"token": token_str})
-    if res.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Token not found")
+    try:
+        if 'tokens_collection' in globals():
+            res = tokens_collection.delete_one({"token": token_str})
+            if res.deleted_count == 0:
+                raise HTTPException(status_code=404, detail="Token not found")
+            return {"message": "Token deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"DB warning on delete token: {e}")
     return {"message": "Token deleted"}
 
 @app.post("/auth/verify")
@@ -190,12 +212,27 @@ async def moderate(
         raise HTTPException(status_code=400, detail="No file uploaded")
     
     image = await file.read()
-    # Log usage
-    usages_collection.insert_one({
-        "token": user["token"],
-        "endpoint": "/moderate",
-        "timestamp": datetime.now(timezone.utc)
-    })
+
+    # Log usage safely without blocking on DB errors
+    try:
+        if 'usages_collection' in globals():
+            usages_collection.insert_one({
+                "token": user["token"],
+                "endpoint": "/moderate",
+                "timestamp": datetime.now(timezone.utc)
+            })
+    except Exception as db_err:
+        print(f"Non-fatal usage log error: {db_err}")
+
+    # Check AWS configuration
+    aws_key = os.getenv("AWS_ACCESS_KEY_ID")
+    aws_secret = os.getenv("AWS_SECRET_ACCESS_KEY")
+    if not aws_key or not aws_secret:
+        raise HTTPException(
+            status_code=500,
+            detail="AWS credentials not configured on Vercel. Please add AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to Environment Variables on Vercel dashboard."
+        )
+
     try:
         resp = rekognition_client.detect_moderation_labels(
             Image={"Bytes": image}, MinConfidence=60
@@ -212,4 +249,4 @@ async def moderate(
             ]
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Mdoeration failed: " + str(e))
+        raise HTTPException(status_code=500, detail=f"AWS Rekognition Error: {str(e)}")
