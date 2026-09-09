@@ -16,22 +16,23 @@ import boto3
 load_dotenv()
 
 # -- Config Variables -------------------------------------------------------
-MONGO_URI = os.getenv("MONGO_URI")
-JWT_SECRET = os.getenv("JWT_SECRET")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+JWT_SECRET = os.getenv("JWT_SECRET", "shield_ai_default_jwt_secret_key_2026")
 ADMIN_USER = os.getenv("ADMIN_USER", "admin")
 ADMIN_PASS = os.getenv("ADMIN_PASS", "admin123")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 600
 
 # -- Linking with MongoDB with MONGO URI from env ---------------------------
-if not MONGO_URI:
-    raise RuntimeError("Missing MONGO_URI ")
-client = MongoClient(MONGO_URI)
-db = client["image_moderation_db"]
-tokens_collection = db["tokens"]
-usages_collection = db["usages"]
+try:
+    client = MongoClient(MONGO_URI)
+    db = client["image_moderation_db"]
+    tokens_collection = db["tokens"]
+    usages_collection = db["usages"]
+except Exception as e:
+    print(f"Warning: Mongo init error: {e}")
 
-# -- making isntance of an app of FastAPI Init -------------------------------
+# -- making instance of an app of FastAPI Init -------------------------------
 app = FastAPI()
 
 # -- Mount Static Files for Frontend UI --------------------------------------
@@ -46,12 +47,6 @@ rekognition_client = boto3.client(
     "rekognition",
     region_name=os.getenv("AWS_DEFAULT_REGION", "us-east-1")
 )
-
-
-
-# -- Function to create JWT access token -------------------------------------
-if not JWT_SECRET:
-    raise RuntimeError("Missing JWT_SECRET")
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
