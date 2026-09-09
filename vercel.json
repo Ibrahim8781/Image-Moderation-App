@@ -1,24 +1,55 @@
 {
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/auth/:path*",
-      "destination": "/api/index.py"
+      "src": "api/index.py",
+      "use": "@vercel/python"
     },
     {
-      "source": "/admin/:path*",
-      "destination": "/api/index.py"
+      "src": "frontend/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.py"
     },
     {
-      "source": "/moderate",
-      "destination": "/api/index.py"
+      "src": "/auth/(.*)",
+      "dest": "/api/index.py"
     },
     {
-      "source": "/ui/:path*",
-      "destination": "/frontend/:path*"
+      "src": "/admin/(.*)",
+      "dest": "/api/index.py"
     },
     {
-      "source": "/",
-      "destination": "/frontend/user.html"
+      "src": "/moderate",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/ui/style.css",
+      "dest": "/frontend/style.css"
+    },
+    {
+      "src": "/ui/app_user.js",
+      "dest": "/frontend/app_user.js"
+    },
+    {
+      "src": "/ui/app_admin.js",
+      "dest": "/frontend/app_admin.js"
+    },
+    {
+      "src": "/ui/admin.html",
+      "dest": "/frontend/admin.html"
+    },
+    {
+      "src": "/ui/user.html",
+      "dest": "/frontend/user.html"
+    },
+    {
+      "src": "/",
+      "dest": "/frontend/user.html"
     }
   ]
 }
